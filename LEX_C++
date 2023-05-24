@@ -1,0 +1,95 @@
+codigo c++
+#include <iostream>
+#include <string>
+#include <vector>
+#include <regex>
+#include <sstream>
+#include <algorithm>
+
+using namespace std;
+
+// Definir los tokens y las expresiones regulares correspondientes
+enum TokenType {
+    ID,
+    PALABRA_CLAVE,
+    ESPACIO
+};
+
+struct Token {
+    TokenType type;
+    string value;
+};
+
+// Función para analizar el texto y generar los tokens
+
+
+vector<Token> analizadorLexico(const string& texto) {
+    vector<Token> tokens;
+
+    regex idRegex("[a-zA-Z][a-zA-Z0-9]*");
+    regex palabraClaveRegex("SELECT|FROM|WHERE", regex_constants::icase);
+    regex espacioRegex("\\s+");
+
+    vector<string> palabrasClave = {"SELECT", "FROM", "WHERE"};
+
+    stringstream ss(texto);
+    string palabra;
+
+    while (ss >> palabra) {
+        Token token;
+
+        palabra = regex_replace(palabra, regex("^\\s+|\\s+$"), "");
+
+        if (regex_match(palabra, palabraClaveRegex)) {
+            token.type = PALABRA_CLAVE;
+            token.value = palabra;
+        }
+        else if (regex_match(palabra, idRegex)) {
+            token.type = ID;
+            token.value = palabra;
+        }
+        else if (regex_match(palabra, espacioRegex)) {
+            token.type = ESPACIO;
+            token.value = palabra;
+        }
+        else {
+            continue;
+        }
+
+        tokens.push_back(token);
+    }
+
+    return tokens;
+}
+
+// Función de utilidad para imprimir los tokens
+void imprimirTokens(const vector<Token>& tokens) {
+    for (const Token& token : tokens) {
+        string tipoToken;
+
+        switch (token.type) {
+            case ID:
+                tipoToken = "ID";
+                break;
+            case PALABRA_CLAVE:
+                tipoToken = "PALABRA CLAVE";
+                break;
+            case ESPACIO:
+                tipoToken = "ESPACIO";
+                break;
+        }
+
+        cout << tipoToken << " = " << token.value << endl;
+    }
+}
+
+int main() {
+    string codigo = "Select name FroM table2 WHEre a2";
+
+    vector<Token> tokens = analizadorLexico(codigo);
+
+    // Imprimir los tokens
+    imprimirTokens(tokens);
+
+    return 0;
+}
